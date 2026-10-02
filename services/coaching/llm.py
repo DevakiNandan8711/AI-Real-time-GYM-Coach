@@ -20,7 +20,7 @@ class LLMCoach:
         ]
 
         response = self.client.chat.completions.create(
-            model="groq/compound-mini",
+            model="qwen/qwen3.8-27b",
             messages=messages,
             temperature=0.4,
         )
