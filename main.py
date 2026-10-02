@@ -1,8 +1,20 @@
+import cv2
+import mediapipe as mp
 import streamlit as st
 import os
 import time
 import pandas as pd
 from dotenv import load_dotenv
+
+# Pre-warm MediaPipe C bindings on the main thread to prevent static TLS dlopen failure in WebRTC threads
+try:
+    from mediapipe.tasks.python.core import mediapipe_c_bindings
+    mediapipe_c_bindings.load_raw_library()
+except Exception as e:
+    import traceback
+    print("WARNING: Pre-warming MediaPipe library:", e, flush=True)
+    traceback.print_exc()
+
 
 load_dotenv()
 from services.auth.login_wall import render_login_wall

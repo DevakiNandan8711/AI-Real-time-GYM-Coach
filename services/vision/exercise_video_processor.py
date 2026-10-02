@@ -39,7 +39,26 @@ class VideoProcessorClass(VideoProcessorBase):
             output_segmentation_masks=False
         )
 
-        self._landmarker = vision.PoseLandmarker.create_from_options(options)
+        try:
+            self._landmarker = vision.PoseLandmarker.create_from_options(options)
+        except Exception as e:
+            import traceback
+            import subprocess
+            print("=" * 60, flush=True)
+            print(f"FAILED TO INITIALIZE POSE LANDMARKER: {e}", flush=True)
+            traceback.print_exc()
+            if os.name == "posix":
+                try:
+                    import importlib.resources as res
+                    lib_ctx = res.files("mediapipe.tasks.c")
+                    lib_p = str(lib_ctx / "libmediapipe.so")
+                    print(f"Checking ldd on: {lib_p}", flush=True)
+                    ldd_out = subprocess.check_output(["ldd", lib_p], stderr=subprocess.STDOUT).decode()
+                    print("LDD RESULT:\n", ldd_out, flush=True)
+                except Exception as ldd_e:
+                    print("Could not run ldd:", ldd_e, flush=True)
+            print("=" * 60, flush=True)
+            raise RuntimeError(f"PoseLandmarker creation failed: {e}") from e
 
         self._detectors = {
             "Squats": SquatDetector(),
